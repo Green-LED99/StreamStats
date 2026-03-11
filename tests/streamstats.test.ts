@@ -373,4 +373,205 @@ describe("StreamStatsService", () => {
     expect(answer.answer).toContain("Premier League");
     expect(answer.answer).toContain("14");
   });
+
+  it("distinguishes latest scorer, last basket, and most recent event in a basketball game", async () => {
+    const fetchImpl: typeof fetch = async (input) => {
+      const url = String(input);
+
+      if (url === "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams") {
+        return jsonResponse({
+          sports: [
+            {
+              leagues: [
+                {
+                  teams: [
+                    {
+                      team: {
+                        id: "4",
+                        displayName: "Chicago Bulls",
+                        shortDisplayName: "Bulls",
+                        location: "Chicago",
+                        name: "Bulls",
+                        abbreviation: "CHI",
+                        slug: "chicago-bulls"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        });
+      }
+
+      if (url.endsWith("/teams") && !url.includes("/basketball/nba/teams")) {
+        return jsonResponse({
+          sports: [{ leagues: [{ teams: [] }] }]
+        });
+      }
+
+      if (url === "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/4/schedule") {
+        return jsonResponse({
+          events: [
+            {
+              id: "401810798",
+              date: "2026-03-11T03:00:00Z",
+              name: "Chicago Bulls at Golden State Warriors",
+              shortName: "CHI @ GS",
+              competitions: [
+                {
+                  status: {
+                    type: {
+                      state: "in",
+                      completed: false,
+                      description: "In Progress"
+                    }
+                  }
+                }
+              ],
+              links: [
+                {
+                  href: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=401810798",
+                  text: "Summary"
+                }
+              ]
+            }
+          ]
+        });
+      }
+
+      if (url === "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=401810798") {
+        return jsonResponse({
+          header: {
+            competitions: [
+              {
+                name: "Chicago Bulls at Golden State Warriors"
+              }
+            ]
+          },
+          plays: [
+            {
+              id: "1",
+              text: "Matas Buzelis makes 28-foot three point step back jumpshot (Josh Giddey assists)",
+              wallclock: "2026-03-11T04:37:05Z",
+              scoringPlay: true,
+              period: {
+                displayValue: "OT"
+              },
+              participants: [
+                {
+                  type: "athlete",
+                  athlete: {
+                    id: "1001"
+                  }
+                }
+              ]
+            },
+            {
+              id: "2",
+              text: "Josh Giddey makes free throw 1 of 2",
+              wallclock: "2026-03-11T04:37:50Z",
+              scoringPlay: true,
+              period: {
+                displayValue: "OT"
+              },
+              participants: [
+                {
+                  type: "athlete",
+                  athlete: {
+                    id: "1002"
+                  }
+                }
+              ]
+            },
+            {
+              id: "3",
+              text: "Josh Giddey misses free throw 2 of 2",
+              wallclock: "2026-03-11T04:38:00Z",
+              scoringPlay: false,
+              period: {
+                displayValue: "OT"
+              },
+              participants: [
+                {
+                  type: "athlete",
+                  athlete: {
+                    id: "1002"
+                  }
+                }
+              ]
+            }
+          ],
+          boxscore: {
+            players: [
+              {
+                statistics: [
+                  {
+                    athletes: [
+                      {
+                        athlete: {
+                          id: "1001",
+                          displayName: "Matas Buzelis"
+                        }
+                      },
+                      {
+                        athlete: {
+                          id: "1002",
+                          displayName: "Josh Giddey"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        });
+      }
+
+      throw new Error(`Unhandled fetch URL: ${url}`);
+    };
+
+    const service = new StreamStatsService({ fetchImpl });
+
+    const gameContext = await service.answerSportsQuery({
+      channelId: "channel-4",
+      userId: "user-4",
+      text: "I'm watching the Bulls game",
+      now: new Date("2026-03-11T04:36:00Z")
+    });
+
+    expect(gameContext.updatedContext?.lastEventId).toBe("401810798");
+
+    const latestScorer = await service.answerSportsQuery({
+      channelId: "channel-4",
+      userId: "user-4",
+      text: "who's the latest scorer",
+      now: new Date("2026-03-11T04:38:01Z")
+    });
+
+    expect(latestScorer.answer).toContain("Josh Giddey");
+    expect(latestScorer.answer).toContain("most recent score");
+
+    const lastBasket = await service.answerSportsQuery({
+      channelId: "channel-4",
+      userId: "user-4",
+      text: "who scored the last basket",
+      now: new Date("2026-03-11T04:38:02Z")
+    });
+
+    expect(lastBasket.answer).toContain("Matas Buzelis");
+    expect(lastBasket.answer).toContain("most recent basket");
+    expect(lastBasket.answer).not.toContain("free throw 1 of 2");
+
+    const latestEvent = await service.answerSportsQuery({
+      channelId: "channel-4",
+      userId: "user-4",
+      text: "what's the most recent event in the bulls game",
+      now: new Date("2026-03-11T04:38:03Z")
+    });
+
+    expect(latestEvent.answer).toContain("most recent event");
+    expect(latestEvent.answer).toContain("Josh Giddey misses free throw 2 of 2");
+  });
 });

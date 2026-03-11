@@ -101,7 +101,7 @@ export class StreamStatsService {
       const updatedContext = this.persistContext(request, {
         lastLeague: eventResult.league,
         lastSport: eventResult.sport as ConversationSportsContext["lastSport"],
-        lastTeamIds: eventResult.teamIds,
+        lastTeamIds: eventResult.teamIds.length > 0 ? eventResult.teamIds : context?.lastTeamIds,
         lastEventId: eventResult.eventId,
         lastActionKey: intent.actionKey
       });

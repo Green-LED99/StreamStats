@@ -66,8 +66,11 @@ function extractAthleteMap(summary: SummaryPayload): Map<string, string> {
 function actionMatcher(actionKey: string, play: Record<string, unknown>): boolean {
   const text = pickBestString(play.text, play.shortText, play.description)?.toLowerCase() ?? "";
   const typeText = safeString(asRecord(play.type)?.text)?.toLowerCase() ?? "";
+  const isScoringPlay = play.scoringPlay === true;
 
   switch (actionKey) {
+    case "event":
+      return Boolean(text);
     case "homeRun":
       return /homered|home run/.test(text) || /home run/.test(typeText);
     case "goal":
@@ -76,8 +79,10 @@ function actionMatcher(actionKey: string, play: Record<string, unknown>): boolea
       return /touchdown/.test(text);
     case "threePointer":
       return /3-pt|3 point|three point/.test(text);
+    case "basket":
+      return (isScoringPlay || /\bmade\b|\bmakes\b/.test(text)) && !/free throw/.test(text);
     case "score":
-      return play.scoringPlay === true || /\bmade\b|\bmakes\b|\bscored\b/.test(text);
+      return isScoringPlay || /\bmade\b|\bmakes\b|\bscored\b/.test(text);
     default:
       return text.includes(actionKey.toLowerCase());
   }
@@ -99,6 +104,22 @@ function playSpecificityScore(play: Record<string, unknown>, actionKey: string):
     if (typeText === "home run") {
       return 1;
     }
+  }
+
+  if (actionKey === "basket") {
+    if (!/free throw/.test(text) && (play.scoringPlay === true || /\bmade\b|\bmakes\b/.test(text))) {
+      return 3;
+    }
+  }
+
+  if (actionKey === "threePointer") {
+    if (/3-pt|3 point|three point/.test(text) && play.scoringPlay === true) {
+      return 3;
+    }
+  }
+
+  if (actionKey === "event") {
+    return text ? 2 : 0;
   }
 
   if (play.scoringPlay === true) {
@@ -166,6 +187,25 @@ function eventName(summary: SummaryPayload): string {
   );
 }
 
+function humanizeActionKey(actionKey: string): string {
+  switch (actionKey) {
+    case "homeRun":
+      return "home run";
+    case "threePointer":
+      return "three-pointer";
+    case "fieldGoal":
+      return "field goal";
+    case "basket":
+      return "basket";
+    case "score":
+      return "score";
+    case "event":
+      return "event";
+    default:
+      return actionKey;
+  }
+}
+
 export async function resolveEventAction(input: {
   client: EspnClient;
   league?: string;
@@ -231,7 +271,11 @@ export async function resolveEventAction(input: {
   const athleteMap = extractAthleteMap(summary);
   const actor = extractActorName(matchingPlay, athleteMap, input.actionKey) ?? "Unknown player";
   const playText = pickBestString(matchingPlay.text, matchingPlay.shortText, matchingPlay.description);
-  const answer = `${actor} had the most recent ${input.actionKey === "homeRun" ? "home run" : input.actionKey} in ${eventName(summary)}.${playText ? ` ${playText}` : ""}${periodLabel(matchingPlay) ? ` (${periodLabel(matchingPlay)}).` : ""}`;
+  const actionLabel = humanizeActionKey(input.actionKey);
+  const answer =
+    input.actionKey === "event"
+      ? `The most recent event in ${eventName(summary)} was${playText ? `: ${playText}` : "."}${periodLabel(matchingPlay) ? ` (${periodLabel(matchingPlay)}).` : ""}`
+      : `${actor} had the most recent ${actionLabel} in ${eventName(summary)}.${playText ? ` ${playText}` : ""}${periodLabel(matchingPlay) ? ` (${periodLabel(matchingPlay)}).` : ""}`;
 
   citations.push({
     label: `${eventName(summary)} summary`,

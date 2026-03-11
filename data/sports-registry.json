@@ -82,11 +82,15 @@
           "three pointer",
           "three"
         ],
-        "score": [
-          "score",
+        "basket": [
           "basket",
           "bucket",
           "field goal"
+        ],
+        "score": [
+          "score",
+          "scored",
+          "scorer"
         ],
         "assist": [
           "assist"

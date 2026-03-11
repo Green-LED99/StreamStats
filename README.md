@@ -40,6 +40,29 @@ Example:
 - `"Who hit that home run?"` means the most recent home run in that stored game.
 - It does not mean the most recent Mets home run unless the user says `"Who hit the last Mets home run?"`
 
+## Agent Behavior Rules
+
+If you are wiring this into a Discord agent, the agent should follow these rules before it ever tells a user something is unsupported:
+
+1. Internally normalize obvious phrasing instead of asking the user to rephrase.
+2. Reuse stream/watch/game commands as sports context.
+3. Treat follow-ups as game-scoped unless the user explicitly asks for one team.
+4. Only surface limitations after an actual ESPN lookup fails.
+
+Examples of required internal rewrites:
+
+- `"who's the latest scorer"` -> latest `score`
+- `"who scored the last basket"` -> latest `basket`
+- `"who just hit that 3 pointer"` -> latest `threePointer`
+- `"what's the most recent event"` -> latest `event`
+
+Important basketball distinction:
+
+- `score` includes free throws
+- `basket` means a made field goal and should not resolve to a free throw
+
+If the user says `"turn on the Lakers game"` or `"I'm watching the Bulls game"`, the handler should store that event as active sports context for later follow-ups.
+
 ## Mental Model
 
 When an AI agent uses this repo correctly, it should think in this order:
@@ -313,9 +336,11 @@ Season leader stats:
 Game follow-up actions:
 
 - three pointer
+- basket
 - score
 - assist
 - rebound
+- event
 
 ### Football
 
@@ -394,6 +419,13 @@ Example:
 - User: `"Who just hit that last 3 pointer?"`
 - Resolver returns the latest 3-point make in the Bulls game event, even if the shooter plays for the opponent
 
+Example:
+
+- User: `"turn on the Lakers game"`
+- Handler starts the stream and stores the chosen Lakers event
+- User: `"who just scored that basket?"`
+- Resolver uses the stored Lakers event instead of asking the user to restate the matchup
+
 ## How Answers Should Read
 
 The answer should make the resolved context obvious.
@@ -401,6 +433,8 @@ The answer should make the resolved context obvious.
 Good:
 
 - `"Nikola Jokic (Denver Nuggets) is the NBA 2025-26 assists per game leader at 10.3."`
+- `"Josh Giddey had the most recent score in Chicago Bulls at Golden State Warriors. Josh Giddey makes free throw 1 of 2 (OT)."`
+- `"Matas Buzelis had the most recent basket in Chicago Bulls at Golden State Warriors. Matas Buzelis makes 28-foot three point step back jumpshot (Josh Giddey assists) (OT)."`
 - `"Gui Santos had the most recent three-pointer in Chicago Bulls at Golden State Warriors. Gui Santos makes 26-foot three point jumper (Pat Spencer assists) (OT)."`
 
 Bad:

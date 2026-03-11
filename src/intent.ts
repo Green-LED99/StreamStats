@@ -17,6 +17,32 @@ function pickLeagueFromTeams(teamMatches: TeamMatch[], context?: ConversationSpo
   return undefined;
 }
 
+function inferActionKey(
+  normalizedText: string,
+  sport: SportsQueryIntent["sport"],
+  matchedActionKey?: string
+): string | undefined {
+  if (matchedActionKey) {
+    return matchedActionKey;
+  }
+
+  if (/\b(?:most recent|latest|last)\s+(?:event|play)\b|\bwhat just happened\b/.test(normalizedText)) {
+    return "event";
+  }
+
+  if (sport === "basketball") {
+    if (/\b(?:last|latest|most recent)\s+(?:basket|bucket|field goal)\b/.test(normalizedText)) {
+      return "basket";
+    }
+
+    if (/\b(?:latest|last|most recent)\s+scorer\b|\bwho(?:\s+just)?\s+scored\b/.test(normalizedText)) {
+      return "score";
+    }
+  }
+
+  return undefined;
+}
+
 export async function parseSportsIntent(input: {
   text: string;
   client: EspnClient;
@@ -33,12 +59,14 @@ export async function parseSportsIntent(input: {
     ? teamMatches.find((team) => team.league === league)?.sport ?? getLeagueEntry(league)?.sport ?? input.context?.lastSport
     : input.context?.lastSport;
   const statKey = matchStatKey(input.text, sport);
-  const actionKey = matchActionKey(input.text, sport);
+  const actionKey = inferActionKey(normalizedText, sport, matchActionKey(input.text, sport));
   const seasonType = matchSeasonType(input.text, sport);
   const seasonYear = parseYear(input.text);
   const leaderHint = /\b(leader|leaders|lead|leads|most|highest|top)\b/.test(normalizedText);
   const gameHint = /\b(game|match|fixture)\b/.test(normalizedText) || teamMatches.length > 0;
-  const isFollowUp = /\b(that|this|latest|most recent|who hit|who scored|who made)\b/.test(normalizedText);
+  const isFollowUp = /\b(that|this|latest|most recent|last|just|who hit|who scored|who made|scorer|what happened)\b/.test(
+    normalizedText
+  );
 
   if (actionKey) {
     return {
@@ -76,7 +104,7 @@ export async function parseSportsIntent(input: {
   return {
     rawText: input.text,
     normalizedText,
-    intent: gameHint ? "game_lookup" : "event_follow_up",
+    intent: gameHint && !isFollowUp ? "game_lookup" : "event_follow_up",
     sport,
     league,
     seasonYear,
