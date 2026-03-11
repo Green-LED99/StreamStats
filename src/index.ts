@@ -24,7 +24,7 @@ export class StreamStatsService {
 
   async answerSportsQuery(request: QueryRequest): Promise<AnswerResult> {
     const now = request.now ?? new Date();
-    const context = this.contextStore.get(request.channelId, request.userId);
+    const context = this.contextStore.get(request.channelId, request.userId, now);
     const intent = await parseSportsIntent({
       text: request.text,
       client: this.client,

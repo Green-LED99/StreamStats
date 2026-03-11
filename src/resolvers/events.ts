@@ -83,6 +83,31 @@ function actionMatcher(actionKey: string, play: Record<string, unknown>): boolea
   }
 }
 
+function playSpecificityScore(play: Record<string, unknown>, actionKey: string): number {
+  const text = pickBestString(play.text, play.shortText, play.description)?.toLowerCase() ?? "";
+  const typeText = safeString(asRecord(play.type)?.text)?.toLowerCase() ?? "";
+
+  if (actionKey === "homeRun") {
+    if (/homered|home run/.test(text) && (play.scoringPlay === true || typeText === "play result")) {
+      return 3;
+    }
+
+    if (/homered|home run/.test(text)) {
+      return 2;
+    }
+
+    if (typeText === "home run") {
+      return 1;
+    }
+  }
+
+  if (play.scoringPlay === true) {
+    return 2;
+  }
+
+  return text ? 1 : 0;
+}
+
 function extractActorId(play: Record<string, unknown>, actionKey: string): string | undefined {
   const participants = asArray<Record<string, unknown>>(play.participants);
   const preferredRoles =
@@ -189,7 +214,15 @@ export async function resolveEventAction(input: {
   const plays = collectPlays(summary);
   const matchingPlay = [...plays]
     .filter((play) => actionMatcher(input.actionKey, play))
-    .sort((left, right) => playTimestamp(right) - playTimestamp(left))[0];
+    .sort((left, right) => {
+      const timeDelta = playTimestamp(right) - playTimestamp(left);
+
+      if (timeDelta !== 0) {
+        return timeDelta;
+      }
+
+      return playSpecificityScore(right, input.actionKey) - playSpecificityScore(left, input.actionKey);
+    })[0];
 
   if (!matchingPlay) {
     throw new Error(`I couldn't find a matching ${input.actionKey} in ${eventName(summary)}.`);

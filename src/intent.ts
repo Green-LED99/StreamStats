@@ -1,4 +1,4 @@
-import { findLeagueKey, matchActionKey, matchSeasonType, matchStatKey } from "./registry.js";
+import { findLeagueKey, getLeagueEntry, matchActionKey, matchSeasonType, matchStatKey } from "./registry.js";
 import type { ConversationSportsContext, SportsQueryIntent, TeamMatch } from "./types.js";
 import { EspnClient } from "./espn-client.js";
 import { parseYear, unique, normalizeText } from "./utils.js";
@@ -29,7 +29,9 @@ export async function parseSportsIntent(input: {
     explicitLeague ? [explicitLeague] : undefined
   );
   const league = explicitLeague ?? input.context?.lastLeague ?? pickLeagueFromTeams(teamMatches, input.context);
-  const sport = league ? teamMatches.find((team) => team.league === league)?.sport ?? input.context?.lastSport : input.context?.lastSport;
+  const sport = league
+    ? teamMatches.find((team) => team.league === league)?.sport ?? getLeagueEntry(league)?.sport ?? input.context?.lastSport
+    : input.context?.lastSport;
   const statKey = matchStatKey(input.text, sport);
   const actionKey = matchActionKey(input.text, sport);
   const seasonType = matchSeasonType(input.text, sport);
@@ -86,4 +88,3 @@ export async function parseSportsIntent(input: {
     isFollowUp
   };
 }
-

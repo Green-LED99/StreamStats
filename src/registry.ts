@@ -71,7 +71,17 @@ export function matchStatKey(text: string, sport?: keyof SportsRegistry["sports"
     return undefined;
   }
 
-  return findAliasKey(text, getSportRule(sport).statAliases);
+  const normalized = normalizeText(text);
+
+  for (const [alias, statKey] of Object.entries(getSportRule(sport).statAliases).sort(
+    (left, right) => right[0].length - left[0].length
+  )) {
+    if (includesAlias(normalized, alias)) {
+      return statKey;
+    }
+  }
+
+  return undefined;
 }
 
 export function matchActionKey(text: string, sport?: keyof SportsRegistry["sports"]): string | undefined {
@@ -106,4 +116,3 @@ export function supportedStats(sport?: keyof SportsRegistry["sports"]): string[]
 export function supportedLeagues(): string[] {
   return Object.keys(registry.leagues);
 }
-

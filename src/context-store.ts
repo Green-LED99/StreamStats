@@ -1,7 +1,7 @@
 import type { ConversationSportsContext } from "./types.js";
 
 export interface ContextStore {
-  get(channelId: string, userId: string): ConversationSportsContext | undefined;
+  get(channelId: string, userId: string, now?: Date): ConversationSportsContext | undefined;
   set(context: ConversationSportsContext): void;
   delete(channelId: string, userId: string): void;
 }
@@ -11,7 +11,7 @@ export class MemoryContextStore implements ContextStore {
 
   constructor(private readonly ttlMs: number) {}
 
-  get(channelId: string, userId: string): ConversationSportsContext | undefined {
+  get(channelId: string, userId: string, now = new Date()): ConversationSportsContext | undefined {
     const key = this.buildKey(channelId, userId);
     const context = this.contexts.get(key);
 
@@ -19,7 +19,7 @@ export class MemoryContextStore implements ContextStore {
       return undefined;
     }
 
-    const ageMs = Date.now() - new Date(context.lastResolvedAt).getTime();
+    const ageMs = now.getTime() - new Date(context.lastResolvedAt).getTime();
 
     if (ageMs > this.ttlMs) {
       this.contexts.delete(key);
@@ -41,4 +41,3 @@ export class MemoryContextStore implements ContextStore {
     return `${channelId}::${userId}`;
   }
 }
-
