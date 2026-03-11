@@ -1,0 +1,295 @@
+{
+  "version": 1,
+  "contextTtlMinutes": 240,
+  "sports": {
+    "baseball": {
+      "leaderSource": "core-leaders",
+      "seasonTypeAliases": {
+        "spring training": 1,
+        "regular season": 2,
+        "postseason": 3,
+        "playoffs": 3
+      },
+      "statAliases": {
+        "batting average": "avg",
+        "average": "avg",
+        "home runs": "homeRuns",
+        "homers": "homeRuns",
+        "rbi": "RBIs",
+        "rbis": "RBIs",
+        "runs": "runs",
+        "ops": "OPS",
+        "obp": "onBasePct",
+        "slugging": "slugAvg",
+        "era": "ERA",
+        "wins": "wins",
+        "strikeouts": "strikeouts",
+        "saves": "saves",
+        "whip": "WHIP",
+        "stolen bases": "stolenBases",
+        "hits": "hits"
+      },
+      "actionAliases": {
+        "homeRun": [
+          "home run",
+          "home-run",
+          "homer",
+          "homerun",
+          "homered"
+        ],
+        "hit": [
+          "hit",
+          "single",
+          "double",
+          "triple"
+        ],
+        "strikeout": [
+          "strikeout",
+          "struck out",
+          "k"
+        ]
+      }
+    },
+    "basketball": {
+      "leaderSource": "core-leaders",
+      "seasonTypeAliases": {
+        "preseason": 1,
+        "regular season": 2,
+        "playoffs": 3,
+        "postseason": 3,
+        "play-in": 5
+      },
+      "statAliases": {
+        "points": "pointsPerGame",
+        "points per game": "pointsPerGame",
+        "assists": "assistsPerGame",
+        "assists per game": "assistsPerGame",
+        "rebounds": "reboundsPerGame",
+        "rebounds per game": "reboundsPerGame",
+        "steals": "stealsPerGame",
+        "blocks": "blocksPerGame",
+        "field goal percentage": "fieldGoalPercentage",
+        "free throw percentage": "FreeThrowPct",
+        "three point percentage": "3PointPct",
+        "three pointers made": "3PointsMadePerGame",
+        "turnovers": "avgTurnovers",
+        "minutes": "minutesPerGame"
+      },
+      "actionAliases": {
+        "threePointer": [
+          "3 pointer",
+          "3-pointer",
+          "three pointer",
+          "three"
+        ],
+        "score": [
+          "score",
+          "basket",
+          "bucket",
+          "field goal"
+        ],
+        "assist": [
+          "assist"
+        ],
+        "rebound": [
+          "rebound"
+        ]
+      }
+    },
+    "football": {
+      "leaderSource": "core-leaders",
+      "seasonTypeAliases": {
+        "preseason": 1,
+        "regular season": 2,
+        "playoffs": 3,
+        "postseason": 3
+      },
+      "statAliases": {
+        "passing yards": "passingYards",
+        "rushing yards": "rushingYards",
+        "receiving yards": "receivingYards",
+        "touchdowns": "touchdowns",
+        "interceptions": "interceptions",
+        "sacks": "sacks"
+      },
+      "actionAliases": {
+        "touchdown": [
+          "touchdown",
+          "td"
+        ],
+        "fieldGoal": [
+          "field goal"
+        ],
+        "interception": [
+          "interception",
+          "pick"
+        ],
+        "sack": [
+          "sack"
+        ]
+      }
+    },
+    "hockey": {
+      "leaderSource": "core-leaders",
+      "seasonTypeAliases": {
+        "preseason": 1,
+        "regular season": 2,
+        "playoffs": 3,
+        "postseason": 3
+      },
+      "statAliases": {
+        "goals": "goals",
+        "assists": "assists",
+        "points": "points",
+        "plus minus": "plusMinus",
+        "gaa": "avgGoalsAgainst",
+        "save percentage": "savePct",
+        "wins": "wins",
+        "shutouts": "shutouts"
+      },
+      "actionAliases": {
+        "goal": [
+          "goal",
+          "scored"
+        ],
+        "assist": [
+          "assist"
+        ],
+        "save": [
+          "save"
+        ]
+      }
+    },
+    "soccer": {
+      "leaderSource": "page-bootstrap",
+      "seasonTypeAliases": {},
+      "statAliases": {
+        "goals": "totalGoals",
+        "scorers": "totalGoals",
+        "assists": "goalAssists",
+        "yellow cards": "yellowCards",
+        "red cards": "redCards",
+        "discipline points": "points"
+      },
+      "actionAliases": {
+        "goal": [
+          "goal",
+          "scored"
+        ],
+        "assist": [
+          "assist"
+        ],
+        "card": [
+          "yellow card",
+          "red card",
+          "card"
+        ]
+      }
+    }
+  },
+  "leagues": {
+    "mlb": {
+      "sport": "baseball",
+      "displayName": "MLB",
+      "aliases": [
+        "mlb",
+        "major league baseball",
+        "baseball"
+      ]
+    },
+    "nba": {
+      "sport": "basketball",
+      "displayName": "NBA",
+      "aliases": [
+        "nba",
+        "national basketball association"
+      ]
+    },
+    "wnba": {
+      "sport": "basketball",
+      "displayName": "WNBA",
+      "aliases": [
+        "wnba"
+      ]
+    },
+    "mens-college-basketball": {
+      "sport": "basketball",
+      "displayName": "NCAA Men's Basketball",
+      "aliases": [
+        "college basketball",
+        "ncaam",
+        "men's college basketball",
+        "mens college basketball"
+      ]
+    },
+    "womens-college-basketball": {
+      "sport": "basketball",
+      "displayName": "NCAA Women's Basketball",
+      "aliases": [
+        "ncaaw",
+        "women's college basketball",
+        "womens college basketball"
+      ]
+    },
+    "nfl": {
+      "sport": "football",
+      "displayName": "NFL",
+      "aliases": [
+        "nfl",
+        "national football league",
+        "football"
+      ]
+    },
+    "college-football": {
+      "sport": "football",
+      "displayName": "College Football",
+      "aliases": [
+        "college football",
+        "ncaaf"
+      ]
+    },
+    "nhl": {
+      "sport": "hockey",
+      "displayName": "NHL",
+      "aliases": [
+        "nhl",
+        "national hockey league",
+        "hockey"
+      ]
+    },
+    "eng.1": {
+      "sport": "soccer",
+      "displayName": "Premier League",
+      "aliases": [
+        "premier league",
+        "epl",
+        "english premier league"
+      ]
+    },
+    "usa.1": {
+      "sport": "soccer",
+      "displayName": "MLS",
+      "aliases": [
+        "mls",
+        "major league soccer"
+      ]
+    },
+    "uefa.champions": {
+      "sport": "soccer",
+      "displayName": "UEFA Champions League",
+      "aliases": [
+        "champions league",
+        "uefa champions league",
+        "ucl"
+      ]
+    },
+    "fifa.world": {
+      "sport": "soccer",
+      "displayName": "FIFA World Cup",
+      "aliases": [
+        "world cup",
+        "fifa world cup"
+      ]
+    }
+  }
+}
